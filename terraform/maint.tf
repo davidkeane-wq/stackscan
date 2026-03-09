@@ -35,7 +35,7 @@ resource "google_storage_bucket" "tfstate" {
 }
 
 resource "google_storage_bucket" "scan_results" {
-  name          = "stackscan-scan-results"
+  name          = "stackscan-scan-results-10719"
   location      = var.region
   force_destroy = false
   uniform_bucket_level_access = true
