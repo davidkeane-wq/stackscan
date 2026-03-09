@@ -6,6 +6,8 @@ body {
   color: #e6edf3;
   min-height: 100vh;
   padding: 2rem 1rem;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -15,11 +17,39 @@ h1 {
   color: #f0f6fc;
 }
 
+h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.85em;
+  background: #21262d;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+/* ── Breadcrumb ──────────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  color: #8b949e;
+}
+
+/* ── Search / action bar ─────────────────────────────────────────────────── */
+
 .search-bar {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-bar input {
@@ -47,9 +77,10 @@ h1 {
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 }
 
-.search-bar button:hover { background: #2ea043; }
+.search-bar button:hover    { background: #2ea043; }
 .search-bar button:disabled { background: #1a4429; border-color: #1a4429; cursor: not-allowed; }
 
 #message {
@@ -60,6 +91,49 @@ h1 {
 }
 
 #message.error { color: #f85149; }
+
+/* ── Spinner ─────────────────────────────────────────────────────────────── */
+
+.spinner {
+  display: none;
+  width: 18px; height: 18px;
+  border: 2px solid #30363d;
+  border-top-color: #388bfd;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #30363d;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-size: 0.9rem;
+  color: #8b949e;
+  background: none;
+}
+
+.tab.active {
+  color: #f0f6fc;
+  background: #161b22;
+  border-color: #30363d;
+}
+
+/* ── Pipeline table ──────────────────────────────────────────────────────── */
 
 .table-wrap { overflow-x: auto; }
 
@@ -91,12 +165,10 @@ td {
   vertical-align: middle;
 }
 
-td a {
-  color: #58a6ff;
-  text-decoration: none;
-}
-
+td a { color: #58a6ff; text-decoration: none; }
 td a:hover { text-decoration: underline; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
 
 .badge {
   display: inline-block;
@@ -105,6 +177,7 @@ td a:hover { text-decoration: underline; }
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .badge-success    { background: #1a4429; color: #3fb950; }
@@ -115,71 +188,165 @@ td a:hover { text-decoration: underline; }
 .badge-queued     { background: #1c2d3d; color: #388bfd; }
 .badge-default    { background: #21262d; color: #e6edf3; }
 
-.spinner {
-  display: none;
-  width: 18px; height: 18px;
-  border: 2px solid #30363d;
-  border-top-color: #388bfd;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin-left: 0.5rem;
-  vertical-align: middle;
-}
+/* Severity-specific badges */
+.badge-critical   { background: #3d0c0c; color: #ff7b72; border: 1px solid #6e1f1f; }
+.badge-medium     { background: #2d2010; color: #e3b341; }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── Scan cards (index page) ─────────────────────────────────────────────── */
 
-
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #30363d;
-}
-
-.tab {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-  font-size: 0.9rem;
-  color: #8b949e;
-  background: none;
-}
-
-.tab.active {
-  color: #f0f6fc;
+.scan-card {
   background: #161b22;
-  border-color: #30363d;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s;
 }
+
+.scan-card:hover { border-color: #58a6ff; }
+
+.scan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.scan-card-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #58a6ff;
+}
+
+.scan-card-date {
+  font-size: 0.8rem;
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.scan-card-meta {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sha { color: #8b949e; }
+
+.finding-count { color: #8b949e; }
+
+.scan-card-severities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.sev-count {
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+.clean { color: #3fb950; font-size: 0.875rem; }
+
+/* ── Scan detail page ────────────────────────────────────────────────────── */
+
+.scan-meta {
+  font-size: 0.875rem;
+  color: #8b949e;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.scan-id-label { color: #8b949e; }
+
+.summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* ── Scanner sections ────────────────────────────────────────────────────── */
+
+.scanner-section { margin-bottom: 2rem; }
+
+.scanner-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #30363d;
+  text-transform: capitalize;
+}
+
+.scanner-count {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #8b949e;
+  background: #21262d;
+  padding: 0.1em 0.5em;
+  border-radius: 2em;
+}
+
+/* ── Findings ────────────────────────────────────────────────────────────── */
 
 .finding {
   padding: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
   border-radius: 6px;
   border: 1px solid #30363d;
   background: #161b22;
 }
 
+.finding-critical { border-left: 3px solid #ff7b72; }
+.finding-high     { border-left: 3px solid #f85149; }
+.finding-medium   { border-left: 3px solid #e3b341; }
+.finding-low      { border-left: 3px solid #388bfd; }
+.finding-info     { border-left: 3px solid #8b949e; }
+
 .finding-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   margin-bottom: 0.4rem;
-  font-weight: 500;
 }
+
+.finding-category {
+  font-size: 0.75rem;
+  color: #8b949e;
+  background: #21262d;
+  padding: 0.1em 0.5em;
+  border-radius: 2em;
+}
+
+.finding-title { font-size: 0.9rem; }
 
 .finding-file {
   font-size: 0.8rem;
   color: #8b949e;
   margin-bottom: 0.4rem;
-  font-family: monospace;
+  font-family: "SFMono-Regular", Consolas, monospace;
 }
 
-.finding-recommendation {
-  font-size: 0.85rem;
-  color: #8b949e;
-  margin-top: 0.4rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid #21262d;
+.finding-detail {
+  font-size: 0.875rem;
+  color: #c9d1d9;
+  line-height: 1.5;
 }

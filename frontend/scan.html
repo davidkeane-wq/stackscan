@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scan Report – StackScan</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="breadcrumb">
+    <a href="/">← All Scans</a>
+  </div>
+
+  <h1 id="pageTitle">Scan Report</h1>
+  <div id="meta" class="scan-meta"></div>
+  <div class="spinner" id="loadSpinner" style="display:inline-block; margin-bottom:1rem"></div>
+  <div id="errorMsg" style="color:#f85149; margin-bottom:1rem"></div>
+
+  <!-- Summary bar -->
+  <div id="summaryBar" class="summary-bar" style="display:none"></div>
+
+  <!-- Findings grouped by scanner -->
+  <div id="findingsContainer"></div>
+
+  <script src="/js/scan.js"></script>
+</body>
+</html>

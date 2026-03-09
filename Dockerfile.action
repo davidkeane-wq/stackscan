@@ -1,0 +1,20 @@
+# Action runner image for the stackscan GitHub Action.
+# This image is separate from the dashboard Dockerfile.
+# Build: docker build -f Dockerfile.action -t stackscan-action .
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install scanner dependencies
+COPY stackscan/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the scanner package
+COPY stackscan/ ./stackscan/
+
+ENV PYTHONPATH=/app
+
+# The GitHub Actions runner mounts the workspace at /github/workspace.
+# TARGET_DIR is resolved relative to that path by the CLI.
+ENTRYPOINT ["python", "-m", "stackscan.cli"]

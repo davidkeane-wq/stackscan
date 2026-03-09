@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//workspace/frontend/**)",
+      "Read(//workspace/terraform/**)",
+      "Read(//workspace/**)",
+      "Bash(rm /workspace/changes.txt /workspace/scripts/security_scan.py && rmdir /workspace/scripts)"
+    ]
+  }
+}

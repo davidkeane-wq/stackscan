@@ -55,6 +55,18 @@ resource "google_cloud_run_v2_service" "app" {
         name  = "GITHUB_TOKEN"
         value = var.github_token
       }
+      env {
+        name  = "DASHBOARD_TOKEN"
+        value = var.dashboard_token
+      }
+      env {
+        name  = "DASHBOARD_URL"
+        value = var.dashboard_url
+      }
+      env {
+        name  = "SCAN_RESULTS_BUCKET"
+        value = google_storage_bucket.scan_results.name
+      }
 
       resources {
         limits = {
@@ -79,9 +91,9 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
   member   = "allUsers"
 }
 
-resource "google_storage_bucket_iam_member" "scan_results_reader" {
+resource "google_storage_bucket_iam_member" "scan_results_admin" {
   bucket = google_storage_bucket.scan_results.name
-  role   = "roles/storage.objectViewer"
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${data.google_compute_default_service_account.default.email}"
 }
 

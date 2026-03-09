@@ -1,44 +1,43 @@
-name: Pipeline Dashboard CI/CD
+name: StackScan CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 env:
-  REGISTRY: australia-southeast1-docker.pkg.dev
+  REGISTRY:   australia-southeast1-docker.pkg.dev
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REPOSITORY: pipeline-dashboard
-  IMAGE: pipeline-dashboard-app
+  REPOSITORY: stackscan
+  IMAGE:      stackscan-app
 
 jobs:
+  # ── 1. Tests ───────────────────────────────────────────────────────────────
   test:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
+        run: pip install -r backend/requirements.txt
 
       - name: Run tests
         run: |
           cd backend
           pytest
 
+  # ── 2. Build & push dashboard image ───────────────────────────────────────
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       id-token: write
@@ -56,52 +55,43 @@ jobs:
 
       - name: Build & push
         run: |
-          docker build -t $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:${{ github.sha }} .
-          docker build -t $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:latest .
+          docker build \
+            -t $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:${{ github.sha }} \
+            -t $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:latest \
+            .
           docker push $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:${{ github.sha }}
           docker push $REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:latest
 
+  # ── 3. Security scan via stackscan action ─────────────────────────────────
   security-scan:
     name: AI Security Scan
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Run StackScan
+        id: scan
+        uses: ./
         with:
-          python-version: "3.12"
+          target_dir: "."
+          dashboard_url: ${{ secrets.DASHBOARD_URL }}
+          dashboard_token: ${{ secrets.DASHBOARD_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
-      - name: Install dependencies
-        run: pip install anthropic
+      - name: Print report URL
+        run: echo "Scan report → ${{ steps.scan.outputs.report_url }}"
 
-      - name: Run security scan
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_SHA: ${{ github.sha }}
-        run: python3 scripts/security_scan.py
-
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-
-      - name: Upload scan report to GCS
-        run: |
-          gcloud storage cp /tmp/scan_report.json \
-            gs://pipeline-dashboard-scan-results/${{ github.sha }}.json
-
+  # ── 4. Deploy dashboard to Cloud Run ──────────────────────────────────────
   deploy:
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
     needs: [build-and-push, security-scan]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       id-token: write
@@ -117,8 +107,11 @@ jobs:
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: pipeline-dashboard
+          service: stackscan
           region: australia-southeast1
           image: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
           env_vars: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            DASHBOARD_TOKEN=${{ secrets.DASHBOARD_TOKEN }}
+            DASHBOARD_URL=${{ secrets.DASHBOARD_URL }}
+            SCAN_RESULTS_BUCKET=${{ secrets.SCAN_RESULTS_BUCKET }}

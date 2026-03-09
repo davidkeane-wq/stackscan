@@ -1,0 +1,32 @@
+name: StackScan Security Scanner
+description: >
+  Scan a repository for security vulnerabilities using Claude AI and post
+  results to the StackScan dashboard, returning a shareable report URL.
+
+inputs:
+  target_dir:
+    description: "Directory to scan relative to the workspace root (default: '.')"
+    required: false
+    default: "."
+  dashboard_url:
+    description: "Base URL of the hosted StackScan dashboard"
+    required: true
+  dashboard_token:
+    description: "Bearer token for dashboard API authentication"
+    required: true
+  anthropic_api_key:
+    description: "Anthropic API key for Claude"
+    required: true
+
+outputs:
+  report_url:
+    description: "Shareable URL of the generated scan report"
+
+runs:
+  using: "docker"
+  image: "Dockerfile.action"
+  env:
+    TARGET_DIR: ${{ inputs.target_dir }}
+    DASHBOARD_URL: ${{ inputs.dashboard_url }}
+    DASHBOARD_TOKEN: ${{ inputs.dashboard_token }}
+    ANTHROPIC_API_KEY: ${{ inputs.anthropic_api_key }}
