@@ -43,6 +43,7 @@ resource "google_storage_bucket" "scan_results" {
 resource "google_cloud_run_v2_service" "app" {
   name     = "stackscan"
   location = var.region
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     containers {
